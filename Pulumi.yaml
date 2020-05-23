@@ -1,0 +1,3 @@
+name: IaC-AWS
+runtime: nodejs
+description: IaC as pulumi in AWS
