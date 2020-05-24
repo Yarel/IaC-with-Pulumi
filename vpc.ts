@@ -1,6 +1,5 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi"
-import { TableEventSubscription } from "@pulumi/aws/dynamodb";
 
 const vpc = new aws.ec2.Vpc("VPC", {
   cidrBlock: "10.0.0.0/16",
@@ -88,63 +87,11 @@ const sg_private = new aws.ec2.SecurityGroup("SecurityGroup-private", {
   vpcId:vpc.id,
 });
 const bastion=genereteEC2("bastion-1a","ami-085925f297f89fce1",true,subnetPublic,sg_Bastion,);
-const app=genereteEC2("App-1b","ami-085925f297f89fce1",false,subnetPrivate_b,sg_private,);
-const server=genereteEC2("server-1c","ami-085925f297f89fce1",false,subnetPrivate_c,sg_private,);
+const app=genereteEC2("App-1b","ami-085925f297f89fce1",false,subnetPublic,sg_private,);
+const server=genereteEC2("bastion-1c","ami-085925f297f89fce1",false,subnetPublic,sg_private,);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-const sg_nlb = new aws.ec2.SecurityGroup("SecurityGroup-ELB", {
-    tags:{Name:"sg-ELB"},
-    ingress: [
-        {protocol: "tcp", fromPort: 80,toPort: 80, cidrBlocks:["0.0.0.0/0"]},
-              ],
-    egress: [{ protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: [ "0.0.0.0/0" ] }],
-    vpcId:vpc.id,
-  });
-const elb = new aws.elb.LoadBalancer("ELB", {
-    /*accessLogs: {
-        bucket: "foo",
-        bucketPrefix: "bar",
-        interval: 60,
-    },*/
-    subnets:[subnetPublic.id,subnetPrivate_b.id,subnetPrivate_c.id],
-    securityGroups:[sg_nlb.id],
-    /*availabilityZones: [
-        "us-east-1",
-           ],*/
-    connectionDraining: true,
-    connectionDrainingTimeout: 400,
-    crossZoneLoadBalancing: true,
-    healthCheck: {
-        healthyThreshold: 2,
-        interval: 30,
-        target: "HTTP:80/index.html",
-        timeout: 3,
-        unhealthyThreshold: 2,
-    },
-    idleTimeout: 400,
-    instances: [app.id,server.id],
-    listeners: [
-        {
-            instancePort: 80,
-            instanceProtocol: "http",
-            lbPort: 80,
-            lbProtocol: "http",
-        },
-       /* {
-            instancePort: 80,
-            instanceProtocol: "http",
-            lbPort: 443,
-            lbProtocol: "https",
-            sslCertificateId: "arn:aws:iam::123456789012:server-certificate/certName",
-        },*/
-    ],
-    tags: {
-        Name: "Load Balancer",
-    },
-});
 //////////////////////////////////////////////////////////////////////////////////////////////////
 export const bastionPublicIP=bastion.publicIp;
 export const bastionPrivate=bastion.privateIp;
 export const appPrivate=app.privateIp;
 export const serverPrivate=server.privateIp;
-export const LoadBalancer=elb.dnsName;
