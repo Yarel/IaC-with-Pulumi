@@ -1,3 +1,3 @@
-name: IaC-AWS
+name: VPC-Cluster
 runtime: nodejs
-description: IaC as pulumi in AWS
+description: IaC VPC cluster(Bastion)

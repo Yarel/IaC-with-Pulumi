@@ -71,7 +71,7 @@ const sg_Bastion = new aws.ec2.SecurityGroup("SecurityGroup-Bastion", {
   tags:{Name:"sg-Bastion"},
   ingress: [
       {protocol: "tcp", fromPort: 22,toPort: 22, cidrBlocks:["0.0.0.0/0"]},
-      //{protocol: "tcp", fromPort: 8888,toPort: 8888, cidrBlocks:["10.0.0.0/16"]},
+      //{protocol: "tcp", fromPort: 8888,toPort: 8888, cidrBlocks:["10.0.0.0/16"]},  //Tinyproxy
             ],
   egress: [{ protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: [ "0.0.0.0/0" ] }],
   vpcId:vpc.id,
@@ -87,8 +87,8 @@ const sg_private = new aws.ec2.SecurityGroup("SecurityGroup-private", {
   vpcId:vpc.id,
 });
 const bastion=genereteEC2("bastion-1a","ami-085925f297f89fce1",true,subnetPublic,sg_Bastion,);
-const app=genereteEC2("App-1b","ami-085925f297f89fce1",false,subnetPublic,sg_private,);
-const server=genereteEC2("bastion-1c","ami-085925f297f89fce1",false,subnetPublic,sg_private,);
+const app=genereteEC2("App-1b","ami-085925f297f89fce1",false,subnetPrivate_b,sg_private,);
+const server=genereteEC2("bastion-1c","ami-085925f297f89fce1",false,subnetPrivate_c,sg_private,);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 export const bastionPublicIP=bastion.publicIp;
