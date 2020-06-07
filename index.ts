@@ -72,7 +72,7 @@ const sg_Bastion = new aws.ec2.SecurityGroup("SecurityGroup-Bastion", {
   tags:{Name:"sg-Bastion"},
   ingress: [
       {protocol: "tcp", fromPort: 22,toPort: 22, cidrBlocks:["0.0.0.0/0"]},
-      //{protocol: "tcp", fromPort: 8888,toPort: 8888, cidrBlocks:["10.0.0.0/16"]},
+      //{protocol: "tcp", fromPort: 8888,toPort: 8888, cidrBlocks:["10.0.0.0/16"]},  //Tinyproxy
             ],
   egress: [{ protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: [ "0.0.0.0/0" ] }],
   vpcId:vpc.id,
@@ -115,11 +115,12 @@ const elb = new aws.elb.LoadBalancer("ELB", {
     connectionDrainingTimeout: 400,
     crossZoneLoadBalancing: true,
     healthCheck: {
-        healthyThreshold: 2,
-        interval: 30,
+        interval: 15,
         target: "HTTP:80/index.html",
-        timeout: 3,
+        timeout: 2,
         unhealthyThreshold: 2,
+        healthyThreshold: 2,
+
     },
     idleTimeout: 400,
     instances: [app.id,server.id],
@@ -131,7 +132,7 @@ const elb = new aws.elb.LoadBalancer("ELB", {
             lbProtocol: "http",
         },
        /* {
-            instancePort: 80,
+            instancePort: 443,
             instanceProtocol: "http",
             lbPort: 443,
             lbProtocol: "https",

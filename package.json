@@ -1,5 +1,5 @@
 {
-    "name": "IaC-AWS",
+    "name": "LB-Cluster",
     "devDependencies": {
         "@types/node": "^10.0.0"
     },
