@@ -1,14 +1,18 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi"
 
+
+// change tags
+
+
 const vpc = new aws.ec2.Vpc("VPC", {
   cidrBlock: "10.0.0.0/16",
-  tags: { Name: "vpc" }
+  tags: { Name: "vpc-test" }
 });
 
 const InternetGateway = new aws.ec2.InternetGateway("InternetGateway", {
   vpcId: vpc.id,
-  tags: { Name: 'InternetGateway' }
+  tags: { Name: 'InternetGateway-test' }
 });
 const generateSubnet = (name: string, cidr: string, vpc: aws.ec2.Vpc, Zone:string) => {
   return new aws.ec2.Subnet(name, {
@@ -19,9 +23,9 @@ const generateSubnet = (name: string, cidr: string, vpc: aws.ec2.Vpc, Zone:strin
   });
 };
 
-const subnetPublic = generateSubnet("SubnetPublic-1a", "10.0.10.0/24", vpc,'us-east-1a');
-const subnetPrivate_b= generateSubnet("SubnetPrivate-1b", "10.0.20.0/24", vpc,'us-east-1b');
-const subnetPrivate_c= generateSubnet("SubnetPrivate-1c", "10.0.30.0/24", vpc,'us-east-1c');
+const subnetPublic = generateSubnet("SubnetPublic-test-1a", "10.0.10.0/24", vpc,'us-east-1a');
+const subnetPrivate_b= generateSubnet("SubnetPrivate-test-1b", "10.0.20.0/24", vpc,'us-east-1b');
+const subnetPrivate_c= generateSubnet("SubnetPrivate-test-1c", "10.0.30.0/24", vpc,'us-east-1c');
 
 const routetablePublic= new aws.ec2.RouteTable('RouteTable-Public',{
     routes:[
@@ -67,8 +71,8 @@ const genereteEC2=(name:string,ami:string,assosiatepublic:boolean,Subnet:aws.ec2
         tags:{Name:name}
       });
 };
-const sg_Bastion = new aws.ec2.SecurityGroup("SecurityGroup-Bastion", {
-  tags:{Name:"sg-Bastion"},
+const sg_Bastion = new aws.ec2.SecurityGroup("SecurityGroup-Bastion-Test", {
+  tags:{Name:"sg-Bastion-test"},
   ingress: [
       {protocol: "tcp", fromPort: 22,toPort: 22, cidrBlocks:["0.0.0.0/0"]},
       //{protocol: "tcp", fromPort: 8888,toPort: 8888, cidrBlocks:["10.0.0.0/16"]},  //Tinyproxy
@@ -76,22 +80,22 @@ const sg_Bastion = new aws.ec2.SecurityGroup("SecurityGroup-Bastion", {
   egress: [{ protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: [ "0.0.0.0/0" ] }],
   vpcId:vpc.id,
 });
-const sg_private = new aws.ec2.SecurityGroup("SecurityGroup-private", {
-  tags:{Name:"sg-private"},
+const sg_private = new aws.ec2.SecurityGroup("SecurityGroup-private-Test", {
+  tags:{Name:"sg-private-Test"},
   ingress: [
       {protocol: "tcp", fromPort: 22,toPort: 22, cidrBlocks:["10.0.0.0/16"]},
-      {protocol: "tcp", fromPort: 80,toPort: 80, cidrBlocks:["10.0.0.0/16"]},
+      // {protocol: "tcp", fromPort: 80,toPort: 80, cidrBlocks:["10.0.0.0/16"]},
 
             ],
   egress: [{ protocol: "-1", fromPort: 0, toPort: 0, cidrBlocks: [ "0.0.0.0/0" ] }],
   vpcId:vpc.id,
 });
-const bastion=genereteEC2("bastion-1a","ami-085925f297f89fce1",true,subnetPublic,sg_Bastion,);
-const app=genereteEC2("App-1b","ami-085925f297f89fce1",false,subnetPrivate_b,sg_private,);
-const server=genereteEC2("bastion-1c","ami-085925f297f89fce1",false,subnetPrivate_c,sg_private,);
+const bastion=genereteEC2("bastion-1a-test","ami-085925f297f89fce1",true,subnetPublic,sg_Bastion,);
+const server1=genereteEC2("server-1","ami-085925f297f89fce1",false,subnetPrivate_b,sg_private,);
+const server2=genereteEC2("server-2","ami-085925f297f89fce1",false,subnetPrivate_c,sg_private,);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 export const bastionPublicIP=bastion.publicIp;
 export const bastionPrivate=bastion.privateIp;
-export const appPrivate=app.privateIp;
-export const serverPrivate=server.privateIp;
+export const server_1=server1.privateIp;
+export const server_2=server2.privateIp;
